@@ -16,6 +16,8 @@ app.use(express.json());
 app.use(express.static("uploads"));
 app.use(express.static("frames")); // Serve extracted frames
 
+app.use("/frames", express.static(path.join(__dirname, "frames")));
+
 // Ensure 'frames/' directory exists
 if (!fs.existsSync("frames")) fs.mkdirSync("frames");
 // Multer configuration for video uploads
@@ -59,7 +61,7 @@ setInterval(() => {
         const framePath = path.join("frames", frameFilename);
 
         extractFrames(path.join("uploads", video), frameFilename, () => {
-            io.emit("frame", { index, frame: `http://localhost:5000/frames/${frameFilename}`,video });
+            io.emit("frame", { index, frame: `https://candle-bramble-freesia.glitch.me/frames/${frameFilename}`,video });
         });
     });
 }, 3000);
