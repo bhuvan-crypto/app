@@ -14,24 +14,25 @@ const io = new Server(server, { cors: { origin: "*" } });
 app.use(cors());
 app.use(express.json());
 app.use(express.static("uploads"));
-app.use(express.static("frames")); // Serve extracted frames
-
-app.use("/frames", express.static(path.join(__dirname, "frames")));
+app.use("/frames", express.static(path.join(__dirname, "frames"))); // Serve frames
 
 // Ensure 'frames/' directory exists
 if (!fs.existsSync("frames")) fs.mkdirSync("frames");
-// Multer configuration for video uploads
+
+// Multer storage for video uploads
 const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, "uploads/"),
     filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
-});``
+});
 const upload = multer({ storage });
 
+// Upload API
 app.post("/upload", upload.single("video"), (req, res) => {
     if (!req.file) return res.status(400).json({ message: "No file uploaded" });
     res.json({ message: "Video uploaded successfully", filename: req.file.filename });
 });
 
+// Fetch list of stored videos
 app.get("/videos", (req, res) => {
     fs.readdir("uploads/", (err, files) => {
         if (err) return res.status(500).json({ error: "Failed to read files" });
@@ -39,31 +40,33 @@ app.get("/videos", (req, res) => {
     });
 });
 
-// Function to extract frames
-const extractFrames = (videoPath, framePath, callback) => {
+// Function to extract frames every 3 seconds
+const extractFrames = (videoPath, outputPrefix, callback) => {
     ffmpeg(videoPath)
-        .on("end", callback)
         .on("error", (err) => console.error("FFmpeg Error:", err))
+        .on("end", () => callback(outputPrefix)) // Call callback after processing
         .screenshots({
-            timestamps: ["3"], // Extract frame at 3 seconds
-            filename: framePath,
+            count: 10, // Extract 10 frames (optional)
+            timemarks: ["3", "6", "9", "12", "15"], // Extract every 3 seconds
+            filename: `${outputPrefix}-%03d.jpg`, // Save as frame_001.jpg, frame_002.jpg...
             folder: "frames/",
-            size: "320x240" // Adjust frame size
+            size: "320x240"
         });
 };
 
-// Emit frames every 3 seconds
+// Extract frames every 3 seconds and send to frontend
 setInterval(() => {
     const videos = fs.readdirSync("uploads/").slice(0, 4); // Pick 4 random videos
 
     videos.forEach((video, index) => {
-        const frameFilename = `frame_${index}.jpg`;
-        const framePath = path.join("frames", frameFilename);
-
-        extractFrames(path.join("uploads", video), frameFilename, () => {
-            io.emit("frame", { index, frame: `https://candle-bramble-freesia.glitch.me/frames/${frameFilename}`,video });
+        const outputPrefix = `frame_${index}`;
+        extractFrames(path.join("uploads", video), outputPrefix, (prefix) => {
+            const frameFiles = fs.readdirSync("frames/").filter(file => file.startsWith(prefix));
+            if (frameFiles.length > 0) {
+                io.emit("frame", { index, frame: `http://localhost:5000/frames/${frameFiles[0]}` });
+            }
         });
     });
-}, 3000);
+}, 3000); // Run every 3 seconds
 
 server.listen(5000, () => console.log("Server running on port 5000"));
