@@ -51,7 +51,7 @@ const extractFrames = (videoPath, framePath, callback) => {
 };
 
 // Emit frames every 3 seconds
-setInterval(() => {
+// setInterval(() => {
 //     const videos = fs.readdirSync("uploads/").slice(0, 4); // Pick 4 random videos
 
 //     videos.forEach((video, index) => {
@@ -62,6 +62,6 @@ setInterval(() => {
 //             io.emit("frame", { index, frame: `http://localhost:5000/frames/${frameFilename}` });
 //         });
 //     });
-}, 3000);
+// }, 3000);
 
 server.listen(5000, () => console.log("Server running on port 5000"));
