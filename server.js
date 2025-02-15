@@ -51,17 +51,17 @@ const extractFrames = (videoPath, framePath, callback) => {
 };
 
 // Emit frames every 3 seconds
-// setInterval(() => {
-//     const videos = fs.readdirSync("uploads/").slice(0, 4); // Pick 4 random videos
+setInterval(() => {
+    const videos = fs.readdirSync("uploads/").slice(0, 4); // Pick 4 random videos
 
-//     videos.forEach((video, index) => {
-//         const frameFilename = `frame_${index}.jpg`;
-//         const framePath = path.join("frames", frameFilename);
+    videos.forEach((video, index) => {
+        const frameFilename = `frame_${index}.jpg`;
+        const framePath = path.join("frames", frameFilename);
 
-//         extractFrames(path.join("uploads", video), frameFilename, () => {
-//             io.emit("frame", { index, frame: `http://localhost:5000/frames/${frameFilename}` });
-//         });
-//     });
-// }, 3000);
+        extractFrames(path.join("uploads", video), frameFilename, () => {
+            io.emit("frame", { index, frame: `http://localhost:5000/frames/${frameFilename}`,video });
+        });
+    });
+}, 3000);
 
 server.listen(5000, () => console.log("Server running on port 5000"));
