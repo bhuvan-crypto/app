@@ -81,7 +81,7 @@ const getRandomFrames = () => {
         .slice(0, 4) // Select 4
         .map((frame, index) => ({
             index,
-            frame: `http://localhost:5000/frames/${frame}`
+            frame: `https://quasar-valley-juniper.glitch.me/frames/${frame}`
         }));
 };
 
@@ -89,12 +89,12 @@ const getRandomFrames = () => {
 setInterval(() => {
     const framesToSend = getRandomFrames();
     if (framesToSend.length > 0) {
-        // framesToSend.forEach(({ index, frame }) => {
-        //     console.log(`Sending frame: ${frame}`);
-        //     io.emit("frame", { index, frame });
-        // });
+        const frames = framesToSend.map(({ index, frame }) => {
+            console.log(`Sending frame: ${frame}`);
+          return frame;
+        });
       
-        io.emit("frame", { frames:framesToSend });
+        io.emit("frame", { frames });
 
     }
 }, 3000);
