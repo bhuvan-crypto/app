@@ -1,0 +1,13 @@
+{
+  "statusCode": 200,
+  "headers": {
+    "connection": "close",
+    "date": "Sat, 15 Feb 2025 17:18:17 GMT",
+    "via": "1.1 varnish",
+    "x-varnish": "2637504604",
+    "etag": "\"0x8DB7EF5EFB4A732\"",
+    "age": "3453"
+  },
+  "requestHeaders": {},
+  "requestTimestamp": 1739639897741
+}

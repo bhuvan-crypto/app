@@ -81,8 +81,8 @@ const getRandomFrames = () => {
         .slice(0, 4) // Select 4
         .map((frame, index) => ({
             index,
-            frame: `https://quasar-valley-juniper.glitch.me/frames/${frame}`
-        }));
+            frame: `https://principled-nice-butterkase.glitch.me/frames/${frame}`
+        }));``
 };
 
 // Send stored frames every 3 seconds
