@@ -54,20 +54,41 @@ const extractFrames = (videoPath, outputPrefix, callback) => {
         });
 };
 
-// Extract frames every 3 seconds and send to frontend
 setInterval(() => {
-    const videos = fs.readdirSync("uploads/").slice(0, 4); // Pick 4 random videos
+    const videos = fs.readdirSync("uploads/");
 
-    videos.forEach((video, index) => {
+    if (videos.length < 4) {
+        console.log("Not enough videos available");
+        return;
+    }
+
+    // Pick 4 random videos
+    const selectedVideos = videos.sort(() => Math.random() - 0.5).slice(0, 4);
+
+    selectedVideos.forEach((video, index) => {
         const outputPrefix = `frame_${index}`;
-        extractFrames(path.join("uploads", video), outputPrefix, (prefix) => {
-            const frameFiles = fs.readdirSync("frames/").filter(file => file.startsWith(prefix));
-            console.log(frameFiles)
-            if (frameFiles.length > 0) {
-                io.emit("frame", { index, frame: `http://localhost:5000/frames/${frameFiles[0]}` });
-            }
-        });
+
+        // Pick a random timestamp between 1s and 10s for frame extraction
+        const randomTime = Math.floor(Math.random() * 10) + 1;
+
+        ffmpeg(path.join("uploads", video))
+            .on("error", (err) => console.error("FFmpeg Error:", err))
+            .on("end", () => {
+                const frameFiles = fs.readdirSync("frames/").filter(file => file.startsWith(outputPrefix));
+                if (frameFiles.length > 0) {
+                    const randomFrame = frameFiles[Math.floor(Math.random() * frameFiles.length)];
+                    console.log(`Sending frame: ${randomFrame}`);
+                    io.emit("frame", { index, frame: `http://localhost:5000/frames/${randomFrame}` });
+                }
+            })
+            .screenshots({
+                timestamps: [`${randomTime}`], // Random time for frame extraction
+                filename: `${outputPrefix}-%03d.jpg`,
+                folder: "frames/",
+                size: "320x240"
+            });
     });
-}, 3000); // Run every 3 seconds
+}, 3000);
+
 
 server.listen(5000, () => console.log("Server running on port 5000"));
