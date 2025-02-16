@@ -62,6 +62,7 @@ setInterval(() => {
         const outputPrefix = `frame_${index}`;
         extractFrames(path.join("uploads", video), outputPrefix, (prefix) => {
             const frameFiles = fs.readdirSync("frames/").filter(file => file.startsWith(prefix));
+            console.log(frameFiles)
             if (frameFiles.length > 0) {
                 io.emit("frame", { index, frame: `http://localhost:5000/frames/${frameFiles[0]}` });
             }
